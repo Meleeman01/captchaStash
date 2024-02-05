@@ -1,6 +1,15 @@
 <html>
 <meta name="viewport" content="width=435, initial-scale=1.0">
+<style>
+    canvas {
+      cursor: url('captchaAssets/spraypaintcan.png'), auto;
+    }
+    canvas:active {
+        cursor: url('captchaAssets/spraypaintcan2.png'), auto;
+    }
+</style>
 <script type="text/javascript" src="captchaStash.js"></script>
+
 <body onload="captcha()">
     <div id="captcha"></div>
 </body>
