@@ -2,13 +2,19 @@ function captcha(){
 	console.log('ready.');
 	init();
 }
-
-
+function restartCaptcha() {
+    document.getElementById('captcha').innerHTML = ``;
+    captcha();
+}
 async function init(){
 	//make a call to the server to get a challenge.
 	const canvas = document.createElement('canvas');
 	const button = document.createElement('button');
-    const SprayLength = 200;
+    const h3 = document.createElement('h3');
+    h3.innerText = "Draw a moustache on that face!";
+    button.innerText = "Submit";
+    button.style.marginTop = "1rem";
+    const SprayLength = 50;
 	const pointsData = [];
 	// button.addEventListener('')
 	let result = await fetch('http://localhost:8000/captchaStash.php?new=true');
@@ -26,8 +32,9 @@ async function init(){
 
 	
 	// Create an image element
+    document.getElementById('captcha').appendChild(h3)
     document.getElementById('captcha').appendChild(canvas)
-
+    document.getElementById('captcha').appendChild(button)
 
 
 
@@ -37,6 +44,7 @@ async function init(){
     let lastY = 0;
 
     // Event listeners for mouse and touch events
+    button.addEventListener('click',submitData);
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', stopDrawing);
@@ -57,8 +65,36 @@ async function init(){
         // Draw the image on the canvas at coordinates (0, 0)
         context.drawImage(img, 0, 0, canvasHandler.width, canvasHandler.height);
     };
-    function submitData(e) {
+    async function submitData(e) {
         //submit points data
+        
+        console.log('submitData!',e.target);
+        let response = await fetch('captchaStash.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(pointsData)
+        });
+        let result = await response.json();
+        console.log(result);
+        if (result.message == 'success') {
+            let img = new Image();
+            img.src = 'data:image/jpeg;base64,' + result.image;
+            // When the image has loaded, draw it on the canvas
+            img.onload = function() {
+                context.drawImage(img, 0, 0, canvas.width, canvas.height);
+            };
+        }
+        if (result.message == 'captcha failed') {
+            let img = new Image();
+            img.src = 'data:image/jpeg;base64,' + result.image;
+            // When the image has loaded, draw it on the canvas
+            img.onload = function() {
+                context.drawImage(img, 0, 0, canvas.width, canvas.height);
+            };
+            canvas.addEventListener('click', restartCaptcha);
+        }
     }
 
     // Function to start drawing
@@ -73,8 +109,8 @@ async function init(){
     function render(e,x,y) {
     	// Set up drawing styles (you can customize these)
         context.fillStyle = '#f0f'; // Stroke color
-        const r = 10;
-        for (let i = 0; i < 10; i++) {
+        const r = 5;
+        for (let i = 0; i < 5; i++) {
             const rx = (Math.random() * 2 - 1) * r;
             const ry = (Math.random() * 2 - 1) * r;
             const d = rx * rx + ry * ry;
